@@ -1,10 +1,12 @@
 import React from 'react'
+import { SEAT_ROWS } from '../data/cinemaData'
 
 /*
   TheaterRoom — Cinema auditorium environment
-  - Realistic tiered concrete / carpet platforms
-  - House Lights mode: Warm overhead chandeliers & wall sconces brightly illuminate the theater
-  - Movie Mode: Atmospheric dim lighting with glowing step strips and wall accents
+  - Dynamically aligns platform tier surfaces to exact seat Y heights
+  - Eliminates seat clipping: seats rest perfectly on top of platform steps
+  - Balcony (Rows H, I, J) fully elevated and visible
+  - Step edge glow strips, aisle lighting, and auditorium walls
 */
 
 export default function TheaterRoom({ isLightsOn = true }) {
@@ -16,79 +18,77 @@ export default function TheaterRoom({ isLightsOn = true }) {
     <group>
       {/* ═══════ MAIN FLOOR CARPET ═══════ */}
       <mesh position={[0, -0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[42, 52]} />
+        <planeGeometry args={[44, 54]} />
         <meshStandardMaterial color={carpetColor} roughness={0.9} metalness={0.1} />
       </mesh>
 
-      {/* ═══════ FRONT SECTION PLATFORM (Rows A-C) ═══════ */}
-      <mesh position={[0, 0.02, -9]}>
-        <boxGeometry args={[18, 0.04, 5.5]} />
+      {/* ═══════ FRONT SECTION BASE PLATFORM (Rows A-C) ═══════ */}
+      <mesh position={[0, 0.02, -8.4]}>
+        <boxGeometry args={[17.8, 0.04, 5.0]} />
         <meshStandardMaterial color={platformColor} roughness={0.85} />
       </mesh>
 
-      {/* ═══════ MIDDLE SECTION TIERED PLATFORMS (Rows D-G) ═══════ */}
-      {[0, 1, 2, 3].map((i) => (
-        <mesh key={`mid-${i}`} position={[0, 0.15 + i * 0.25, -4 + i * 1.6]}>
-          <boxGeometry args={[18, 0.15 + i * 0.25, 1.55]} />
-          <meshStandardMaterial color={platformColor} roughness={0.85} />
-        </mesh>
-      ))}
+      {/* ═══════ DYNAMIC TIERED PLATFORMS (Rows D through J) ═══════ */}
+      {SEAT_ROWS.filter((r) => r.y > 0.04).map((r) => {
+        // Platform top surface is at r.y, so center is r.y / 2 with height r.y
+        const height = r.y
+        const centerY = r.y / 2
+        const depth = 1.58
 
-      {/* ═══════ BALCONY SECTION TIERED PLATFORMS (Rows H-J) ═══════ */}
-      {[0, 1, 2].map((i) => (
-        <mesh key={`bal-${i}`} position={[0, 1.4 + i * 0.35, 3.5 + i * 1.6]}>
-          <boxGeometry args={[18, 1.4 + i * 0.35, 1.55]} />
-          <meshStandardMaterial color={platformColor} roughness={0.85} />
-        </mesh>
-      ))}
+        return (
+          <React.Fragment key={`platform-${r.name}`}>
+            {/* Solid platform block */}
+            <mesh position={[0, centerY, r.z]}>
+              <boxGeometry args={[17.8, height, depth]} />
+              <meshStandardMaterial color={platformColor} roughness={0.85} />
+            </mesh>
 
-      {/* ═══════ STEP EDGE GLOW STRIPS ═══════ */}
-      {[
-        { z: -5.2, y: 0.16 },
-        { z: -3.6, y: 0.41 },
-        { z: -2.0, y: 0.66 },
-        { z: -0.4, y: 0.91 },
-        { z: 2.8, y: 1.41 },
-        { z: 4.4, y: 1.76 },
-        { z: 6.0, y: 2.11 },
-      ].map((step, i) => (
-        <mesh key={`step-${i}`} position={[0, step.y, step.z]}>
-          <boxGeometry args={[16.5, 0.025, 0.04]} />
-          <meshStandardMaterial
-            color="#f59e0b"
-            emissive="#f59e0b"
-            emissiveIntensity={isLightsOn ? 1.4 : 2.2}
-          />
-        </mesh>
-      ))}
+            {/* Step edge glow strip at front of the step */}
+            <mesh position={[0, r.y + 0.015, r.z - depth / 2]}>
+              <boxGeometry args={[16.6, 0.025, 0.04]} />
+              <meshStandardMaterial
+                color="#f59e0b"
+                emissive="#f59e0b"
+                emissiveIntensity={isLightsOn ? 1.5 : 2.5}
+              />
+            </mesh>
+          </React.Fragment>
+        )
+      })}
 
-      {/* ═══════ AISLE LIGHT STRIPS (Left, Right, Center) ═══════ */}
+      {/* ═══════ CROSS-AISLE WALKWAY (Between Middle & Balcony) ═══════ */}
+      <mesh position={[0, 1.35 / 2, 1.8]}>
+        <boxGeometry args={[17.8, 1.35, 0.8]} />
+        <meshStandardMaterial color={platformColor} roughness={0.85} />
+      </mesh>
+
+      {/* ═══════ SIDE AISLE LIGHT STRIPS (Left & Right) ═══════ */}
       {/* Left aisle */}
-      <mesh position={[-7.8, 0.03, -2]}>
+      <mesh position={[-7.8, 0.04, -2]}>
         <boxGeometry args={[0.06, 0.02, 22]} />
         <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={2.0} />
       </mesh>
       <pointLight
-        position={[-7.8, 0.3, -2]}
+        position={[-7.8, 0.4, -2]}
         intensity={isLightsOn ? 2 : 4}
         distance={6}
         color="#f59e0b"
       />
 
       {/* Right aisle */}
-      <mesh position={[7.8, 0.03, -2]}>
+      <mesh position={[7.8, 0.04, -2]}>
         <boxGeometry args={[0.06, 0.02, 22]} />
         <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={2.0} />
       </mesh>
       <pointLight
-        position={[7.8, 0.3, -2]}
+        position={[7.8, 0.4, -2]}
         intensity={isLightsOn ? 2 : 4}
         distance={6}
         color="#f59e0b"
       />
 
-      {/* Center walkway divider */}
-      <mesh position={[0, 0.02, -2]}>
+      {/* Center aisle walkway divider */}
+      <mesh position={[0, 0.03, -2]}>
         <boxGeometry args={[0.08, 0.02, 22]} />
         <meshStandardMaterial
           color="#38bdf8"
@@ -156,11 +156,11 @@ export default function TheaterRoom({ isLightsOn = true }) {
       {/* ═══════ HOUSE LIGHTS DOWNLIGHTS (Active when Lights ON) ═══════ */}
       {isLightsOn && (
         <>
-          <pointLight position={[0, 8.5, -7]} intensity={25} distance={16} color="#fef3c7" />
-          <pointLight position={[0, 8.5, -1]} intensity={28} distance={18} color="#fef3c7" />
-          <pointLight position={[0, 9.5, 5]} intensity={30} distance={20} color="#fef3c7" />
-          <pointLight position={[-4, 8, 0]} intensity={18} distance={14} color="#fde68a" />
-          <pointLight position={[4, 8, 0]} intensity={18} distance={14} color="#fde68a" />
+          <pointLight position={[0, 9.5, -7]} intensity={25} distance={16} color="#fef3c7" />
+          <pointLight position={[0, 9.5, -1]} intensity={28} distance={18} color="#fef3c7" />
+          <pointLight position={[0, 10.5, 5]} intensity={32} distance={20} color="#fef3c7" />
+          <pointLight position={[-4, 9, 0]} intensity={18} distance={14} color="#fde68a" />
+          <pointLight position={[4, 9, 0]} intensity={18} distance={14} color="#fde68a" />
         </>
       )}
 

@@ -1,21 +1,21 @@
 // Shared cinema configuration and dynamic seat generator
 
 export const SEAT_ROWS = [
-  // BALCONY (Elevated, premium, furthest from screen)
-  { name: 'J', z: 6.5,  y: 2.10, section: 'Balcony', tierName: 'BALCONY · RECLINER', price: 400 },
-  { name: 'I', z: 5.0,  y: 1.75, section: 'Balcony', tierName: 'BALCONY · PRIME', price: 380 },
-  { name: 'H', z: 3.5,  y: 1.40, section: 'Balcony', tierName: 'BALCONY · CLASSIC', price: 350 },
+  // BALCONY (Elevated, premium, highest tiers)
+  { name: 'J', z: 6.2,  y: 2.50, section: 'Balcony', tierName: 'BALCONY · RECLINER', price: 400 },
+  { name: 'I', z: 4.6,  y: 2.05, section: 'Balcony', tierName: 'BALCONY · PRIME', price: 380 },
+  { name: 'H', z: 3.0,  y: 1.60, section: 'Balcony', tierName: 'BALCONY · CLASSIC', price: 350 },
 
-  // MIDDLE (Tiered middle auditorium)
-  { name: 'G', z: -0.5, y: 0.90, section: 'Middle',  tierName: 'PRIME · ROW G', price: 280 },
-  { name: 'F', z: -2.0, y: 0.65, section: 'Middle',  tierName: 'PRIME · ROW F', price: 280 },
-  { name: 'E', z: -3.5, y: 0.40, section: 'Middle',  tierName: 'PRIME · ROW E', price: 250 },
-  { name: 'D', z: -5.0, y: 0.15, section: 'Middle',  tierName: 'PRIME · ROW D', price: 220 },
+  // MIDDLE AUDITORIUM (Tiered middle auditorium)
+  { name: 'G', z: 0.6,  y: 1.15, section: 'Middle',  tierName: 'PRIME · ROW G', price: 280 },
+  { name: 'F', z: -1.0, y: 0.85, section: 'Middle',  tierName: 'PRIME · ROW F', price: 280 },
+  { name: 'E', z: -2.6, y: 0.55, section: 'Middle',  tierName: 'PRIME · ROW E', price: 250 },
+  { name: 'D', z: -4.2, y: 0.25, section: 'Middle',  tierName: 'PRIME · ROW D', price: 220 },
 
-  // FRONT (Closest to the big movie screen)
-  { name: 'C', z: -7.5, y: 0.05, section: 'Front',   tierName: 'CLASSIC · ROW C', price: 180 },
-  { name: 'B', z: -9.0, y: 0.0,  section: 'Front',   tierName: 'CLASSIC · ROW B', price: 150 },
-  { name: 'A', z: -10.5,y: 0.0,  section: 'Front',   tierName: 'CLASSIC · ROW A', price: 150 },
+  // FRONT SECTION (Closest to the big movie screen)
+  { name: 'C', z: -6.8, y: 0.05, section: 'Front',   tierName: 'CLASSIC · ROW C', price: 180 },
+  { name: 'B', z: -8.4, y: 0.0,  section: 'Front',   tierName: 'CLASSIC · ROW B', price: 150 },
+  { name: 'A', z: -10.0, y: 0.0, section: 'Front',   tierName: 'CLASSIC · ROW A', price: 150 },
 ]
 
 export const SEATS_PER_ROW = 10

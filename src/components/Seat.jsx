@@ -3,10 +3,11 @@ import gsap from 'gsap'
 
 /*
   Seat Component:
-  - Rich cinema plush fabric with visible highlights and specular reflections
-  - Clear contrast against floor so seats are distinctly visible even in dim lighting
-  - Distinct colors for Balcony (royal ruby), Prime (deep crimson), and Classic (cinema red)
-  - Interactive states: Available, Sold (grey), Selected (gold), Confirmed (emerald)
+  - Available: Light Green (#22c55e / #16a34a)
+  - Booked / Sold: Full Grey (#64748b / #334155)
+  - Selected: Bright Amber / Gold (#f59e0b)
+  - Confirmed: Radiant Emerald Green (#10b981)
+  - Hover: Cool Sky Blue (#38bdf8)
 */
 
 export default function Seat({
@@ -41,51 +42,40 @@ export default function Seat({
     return () => { document.body.style.cursor = 'auto' }
   }, [hovered, isOccupied])
 
-  // Tier-based default fabric color (Visible classic cinema seats!)
-  const getTierColor = () => {
-    if (row === 'J' || row === 'I' || row === 'H') {
-      // Royal Balcony: Deep Wine / Ruby Velvet
-      return { cushion: '#9f1239', shell: '#4c0519' }
-    }
-    if (row === 'G' || row === 'F' || row === 'E' || row === 'D') {
-      // Prime Recliners: Classic Cinema Crimson
-      return { cushion: '#b91c1c', shell: '#7f1d1d' }
-    }
-    // Front: Vibrant Cinema Red
-    return { cushion: '#dc2626', shell: '#991b1b' }
-  }
-
-  const tierColors = getTierColor()
-  let cushionColor = tierColors.cushion
-  let shellColor = tierColors.shell
-  let emissiveColor = '#000000'
-  let emissiveIntensity = 0
+  // Seat Colors based on User Specification:
+  // Available: Light Green
+  // Booked / Sold: Full Grey
+  let cushionColor = '#22c55e'  // Vibrant Light Green for available seats
+  let shellColor = '#15803d'    // Darker forest green shell
+  let emissiveColor = '#16a34a'
+  let emissiveIntensity = 0.12
 
   if (isOccupied) {
-    // Sold seat: Slate grey, clearly occupied
-    cushionColor = '#475569'
-    shellColor = '#334155'
+    // Booked / Sold: Full Grey
+    cushionColor = '#64748b'    // Solid medium slate grey
+    shellColor = '#334155'      // Darker grey shell
+    emissiveColor = '#000000'
+    emissiveIntensity = 0
   } else if (isConfirmed) {
     // Confirmed: Bright Emerald Green
     cushionColor = '#10b981'
     shellColor = '#065f46'
     emissiveColor = '#059669'
-    emissiveIntensity = 0.6
+    emissiveIntensity = 0.65
   } else if (isSelected) {
     // Selected: Radiant Amber / Gold
     cushionColor = '#f59e0b'
     shellColor = '#b45309'
     emissiveColor = '#d97706'
-    emissiveIntensity = 0.8
+    emissiveIntensity = 0.85
   } else if (hovered) {
-    // Hover: Bright Sky Blue
+    // Hover: Cool Sky Blue
     cushionColor = '#38bdf8'
     shellColor = '#0369a1'
     emissiveColor = '#0284c7'
-    emissiveIntensity = 0.45
+    emissiveIntensity = 0.5
   } else if (!isLightsOn) {
-    // In movie mode, give a very subtle velvet sheen so it never turns pitch-black
-    emissiveColor = cushionColor
+    // In movie mode, subtle green velvet glow so it remains visible
     emissiveIntensity = 0.08
   }
 
@@ -122,8 +112,8 @@ export default function Seat({
         <boxGeometry args={[0.54, 0.12, 0.5]} />
         <meshStandardMaterial
           color={cushionColor}
-          roughness={0.65}
-          metalness={0.15}
+          roughness={0.55}
+          metalness={0.1}
           emissive={emissiveColor}
           emissiveIntensity={emissiveIntensity}
         />
@@ -134,8 +124,8 @@ export default function Seat({
         <boxGeometry args={[0.54, 0.58, 0.1]} />
         <meshStandardMaterial
           color={cushionColor}
-          roughness={0.65}
-          metalness={0.15}
+          roughness={0.55}
+          metalness={0.1}
           emissive={emissiveColor}
           emissiveIntensity={emissiveIntensity}
         />
@@ -144,10 +134,10 @@ export default function Seat({
       {/* Backrest Outer Protective Shell */}
       <mesh position={[0, 0.62, 0.28]} rotation={[0.08, 0, 0]}>
         <boxGeometry args={[0.58, 0.62, 0.04]} />
-        <meshStandardMaterial color={shellColor} roughness={0.5} metalness={0.3} />
+        <meshStandardMaterial color={shellColor} roughness={0.5} metalness={0.25} />
       </mesh>
 
-      {/* Left Armrest with Cup Holder */}
+      {/* Left Armrest */}
       <mesh position={[-0.31, 0.42, 0.05]}>
         <boxGeometry args={[0.07, 0.18, 0.44]} />
         <meshStandardMaterial color="#27272a" roughness={0.4} metalness={0.6} />
@@ -158,7 +148,7 @@ export default function Seat({
         <meshStandardMaterial color="#3f3f46" roughness={0.3} metalness={0.4} />
       </mesh>
 
-      {/* Right Armrest with Cup Holder */}
+      {/* Right Armrest */}
       <mesh position={[0.31, 0.42, 0.05]}>
         <boxGeometry args={[0.07, 0.18, 0.44]} />
         <meshStandardMaterial color="#27272a" roughness={0.4} metalness={0.6} />

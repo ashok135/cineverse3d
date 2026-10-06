@@ -47,8 +47,8 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #38bdf8;
-  box-shadow: 0 0 12px #38bdf8;
+  background: #22c55e;
+  box-shadow: 0 0 12px #22c55e;
 }
 
 .brand-title {
@@ -389,7 +389,7 @@
   width: 10px;
 }
 
-/* Seat Pill Styling */
+/* Seat Pill Styling — Available is Light Green, Booked is Full Grey */
 .tr-seat-pill {
   width: 21px;
   height: 19px;
@@ -405,9 +405,9 @@
   padding: 0;
 }
 
-/* Available */
+/* Available: Light Green */
 .tr-seat-pill.available {
-  background: #f8fafc;
+  background: #dcfce7;
   border-color: #22c55e;
   color: #15803d;
 }
@@ -419,16 +419,16 @@
   box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
 }
 
-/* Sold / Occupied */
+/* Booked / Sold: Full Grey */
 .tr-seat-pill.occupied {
-  background: #94a3b8;
-  border-color: #94a3b8;
-  color: #e2e8f0;
-  opacity: 0.55;
+  background: #64748b;
+  border-color: #475569;
+  color: #cbd5e1;
+  opacity: 0.65;
   cursor: not-allowed;
 }
 
-/* Selected */
+/* Selected: Amber / Gold */
 .tr-seat-pill.selected {
   background: #f59e0b;
   border-color: #fbbf24;
@@ -438,7 +438,7 @@
   box-shadow: 0 0 10px rgba(245, 158, 11, 0.85);
 }
 
-/* Confirmed */
+/* Confirmed: Emerald */
 .tr-seat-pill.confirmed {
   background: #10b981;
   border-color: #34d399;
@@ -1029,7 +1029,7 @@
   border-color: #38bdf8;
 }
 
-/* Seat Legend Bar with Lights Quick Button */
+/* Seat Legend Bar — Matching Light Green Available & Full Grey Booked */
 .cinema-legend {
   position: absolute;
   bottom: 24px;
@@ -1054,25 +1054,30 @@
 }
 
 .legend-swatch {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   border-radius: 3px;
 }
 
+/* Available: Light Green */
 .legend-swatch.available {
-  background: #f8fafc;
-  border: 1.5px solid #22c55e;
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
 }
 
+/* Booked / Sold: Full Grey */
 .legend-swatch.occupied {
-  background: #94a3b8;
+  background: #64748b;
+  border: 1px solid #475569;
 }
 
+/* Selected: Amber */
 .legend-swatch.selected {
   background: #f59e0b;
   box-shadow: 0 0 6px #f59e0b;
 }
 
+/* Confirmed: Emerald */
 .legend-swatch.confirmed {
   background: #10b981;
   box-shadow: 0 0 6px #10b981;
