@@ -2,23 +2,20 @@ import React from 'react'
 import { SEAT_ROWS } from '../data/cinemaData'
 
 /*
-  TheaterRoom — Premium Architectural Cinema Auditorium
-  - 3D Acoustic Baffle Wall Panels with depth, texture, and rhythm
-  - Architectural vertical LED cove lighting strips between panels
-  - Wall-mounted angled Dolby Atmos surround speakers along both sides
-  - Rear wall projectionist booth window with soft optical glass glow
-  - Dual emergency exit doors with illuminated green EXIT signs
-  - Ceiling acoustic clouds with recessed downlight fixtures
-  - Mathematically aligned tier steps so all seats rest perfectly on top
+  TheaterRoom — Inward-Facing Non-Blocking Cinema Auditorium
+  - Single-sided inward-facing walls:
+    * From INSIDE: Rich 3D acoustic panels, LED cove lights, Dolby Atmos speakers, exit doors
+    * From OUTSIDE: 100% INVISIBLE (Backface culled) — walls NEVER block your camera view!
+  - Pushed comfortably wide (x = ±13.5, z = 13.0) so camera is always cleanly inside
+  - Tiered platform risers aligned with seats for zero clipping
 */
 
 export default function TheaterRoom({ isLightsOn = true }) {
   // Auditorium color palette
   const carpetColor = isLightsOn ? '#1a1e28' : '#0e1118'
   const platformColor = isLightsOn ? '#222736' : '#141822'
-  const wallBaseColor = isLightsOn ? '#1c202c' : '#0b0e16'
-  const panelColor = isLightsOn ? '#282e3d' : '#131722'
-  const trimColor = '#0a0d14'
+  const wallBaseColor = isLightsOn ? '#1e2330' : '#0d1017'
+  const panelColor = isLightsOn ? '#2a3142' : '#141822'
   const coveGlowColor = isLightsOn ? '#f59e0b' : '#38bdf8'
   const coveIntensity = isLightsOn ? 2.2 : 1.4
 
@@ -27,7 +24,7 @@ export default function TheaterRoom({ isLightsOn = true }) {
 
   return (
     <group>
-      {/* ═══════ 1. MAIN FLOOR CARPET WITH LUXURY BORDER ═══════ */}
+      {/* ═══════ 1. MAIN FLOOR CARPET ═══════ */}
       <mesh position={[0, -0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[44, 54]} />
         <meshStandardMaterial color={carpetColor} roughness={0.92} metalness={0.08} />
@@ -107,42 +104,32 @@ export default function TheaterRoom({ isLightsOn = true }) {
         />
       </mesh>
 
-      {/* ═══════ 6. 3D ARCHITECTURAL WALLS & ACOUSTIC PANELS ═══════ */}
+      {/* ═══════ 6. INWARD-FACING SIDE WALLS (NEVER BLOCK CAMERA) ═══════ */}
 
-      {/* Left Wall Base */}
-      <mesh position={[-12.2, 5.5, -0.4]}>
-        <boxGeometry args={[0.4, 12, 26]} />
+      {/* Left Wall Plane (Normals point +X inward; Invisible from outside) */}
+      <mesh position={[-13.5, 5.5, -0.4]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[28, 12]} />
         <meshStandardMaterial color={wallBaseColor} roughness={0.9} />
       </mesh>
 
-      {/* Right Wall Base */}
-      <mesh position={[12.2, 5.5, -0.4]}>
-        <boxGeometry args={[0.4, 12, 26]} />
+      {/* Right Wall Plane (Normals point -X inward; Invisible from outside) */}
+      <mesh position={[13.5, 5.5, -0.4]} rotation={[0, -Math.PI / 2, 0]}>
+        <planeGeometry args={[28, 12]} />
         <meshStandardMaterial color={wallBaseColor} roughness={0.9} />
       </mesh>
 
-      {/* Left Wall 3D Acoustic Baffle Panels & Vertical LED Strips */}
+      {/* Left Wall 3D Acoustic Baffle Panels & LED Strips */}
       {panelZs.map((z, idx) => (
         <React.Fragment key={`left-panel-${idx}`}>
           {/* Acoustic 3D Panel */}
-          <mesh position={[-11.95, 5.5, z]}>
+          <mesh position={[-13.35, 5.5, z]}>
             <boxGeometry args={[0.2, 9.8, 2.3]} />
             <meshStandardMaterial color={panelColor} roughness={0.7} metalness={0.15} />
           </mesh>
 
-          {/* Panel Top & Bottom Trim */}
-          <mesh position={[-11.88, 10.4, z]}>
-            <boxGeometry args={[0.24, 0.12, 2.34]} />
-            <meshStandardMaterial color={trimColor} metalness={0.8} roughness={0.2} />
-          </mesh>
-          <mesh position={[-11.88, 0.6, z]}>
-            <boxGeometry args={[0.24, 0.12, 2.34]} />
-            <meshStandardMaterial color={trimColor} metalness={0.8} roughness={0.2} />
-          </mesh>
-
-          {/* Vertical Architectural LED Cove Light Strip (Between Panels) */}
-          <mesh position={[-11.98, 5.5, z + 1.35]}>
-            <boxGeometry args={[0.08, 9.4, 0.08]} />
+          {/* Vertical Architectural LED Cove Light Strip */}
+          <mesh position={[-13.38, 5.5, z + 1.35]}>
+            <boxGeometry args={[0.06, 9.4, 0.06]} />
             <meshStandardMaterial
               color={coveGlowColor}
               emissive={coveGlowColor}
@@ -153,27 +140,24 @@ export default function TheaterRoom({ isLightsOn = true }) {
           {/* Sconce Accent Point Light */}
           {idx % 2 === 1 && (
             <pointLight
-              position={[-11.6, 5.8, z]}
-              intensity={isLightsOn ? 9 : 5}
-              distance={8}
+              position={[-13.0, 5.8, z]}
+              intensity={isLightsOn ? 8 : 4}
+              distance={7}
               color={coveGlowColor}
             />
           )}
 
-          {/* Dolby Atmos Surround Speaker (Mounted on wall) */}
+          {/* Dolby Atmos Surround Speaker */}
           {idx % 2 === 0 && (
-            <group position={[-11.8, 7.2, z]} rotation={[0, 0, 0.28]}>
-              {/* Speaker Cabinet */}
+            <group position={[-13.1, 7.2, z]} rotation={[0, 0, 0.28]}>
               <mesh>
                 <boxGeometry args={[0.25, 0.55, 0.38]} />
                 <meshStandardMaterial color="#111319" roughness={0.4} metalness={0.6} />
               </mesh>
-              {/* Speaker Grille */}
               <mesh position={[0.13, 0, 0]}>
                 <boxGeometry args={[0.02, 0.48, 0.32]} />
                 <meshStandardMaterial color="#1e222d" roughness={0.8} />
               </mesh>
-              {/* Dolby Blue Status LED */}
               <mesh position={[0.14, -0.2, 0]}>
                 <boxGeometry args={[0.01, 0.03, 0.03]} />
                 <meshStandardMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={3} />
@@ -183,28 +167,18 @@ export default function TheaterRoom({ isLightsOn = true }) {
         </React.Fragment>
       ))}
 
-      {/* Right Wall 3D Acoustic Baffle Panels & Vertical LED Strips */}
+      {/* Right Wall 3D Acoustic Baffle Panels & LED Strips */}
       {panelZs.map((z, idx) => (
         <React.Fragment key={`right-panel-${idx}`}>
           {/* Acoustic 3D Panel */}
-          <mesh position={[11.95, 5.5, z]}>
+          <mesh position={[13.35, 5.5, z]}>
             <boxGeometry args={[0.2, 9.8, 2.3]} />
             <meshStandardMaterial color={panelColor} roughness={0.7} metalness={0.15} />
           </mesh>
 
-          {/* Panel Top & Bottom Trim */}
-          <mesh position={[11.88, 10.4, z]}>
-            <boxGeometry args={[0.24, 0.12, 2.34]} />
-            <meshStandardMaterial color={trimColor} metalness={0.8} roughness={0.2} />
-          </mesh>
-          <mesh position={[11.88, 0.6, z]}>
-            <boxGeometry args={[0.24, 0.12, 2.34]} />
-            <meshStandardMaterial color={trimColor} metalness={0.8} roughness={0.2} />
-          </mesh>
-
-          {/* Vertical Architectural LED Cove Light Strip (Between Panels) */}
-          <mesh position={[11.98, 5.5, z + 1.35]}>
-            <boxGeometry args={[0.08, 9.4, 0.08]} />
+          {/* Vertical Architectural LED Cove Light Strip */}
+          <mesh position={[13.38, 5.5, z + 1.35]}>
+            <boxGeometry args={[0.06, 9.4, 0.06]} />
             <meshStandardMaterial
               color={coveGlowColor}
               emissive={coveGlowColor}
@@ -215,27 +189,24 @@ export default function TheaterRoom({ isLightsOn = true }) {
           {/* Sconce Accent Point Light */}
           {idx % 2 === 1 && (
             <pointLight
-              position={[11.6, 5.8, z]}
-              intensity={isLightsOn ? 9 : 5}
-              distance={8}
+              position={[13.0, 5.8, z]}
+              intensity={isLightsOn ? 8 : 4}
+              distance={7}
               color={coveGlowColor}
             />
           )}
 
-          {/* Dolby Atmos Surround Speaker (Mounted on wall) */}
+          {/* Dolby Atmos Surround Speaker */}
           {idx % 2 === 0 && (
-            <group position={[11.8, 7.2, z]} rotation={[0, 0, -0.28]}>
-              {/* Speaker Cabinet */}
+            <group position={[13.1, 7.2, z]} rotation={[0, 0, -0.28]}>
               <mesh>
                 <boxGeometry args={[0.25, 0.55, 0.38]} />
                 <meshStandardMaterial color="#111319" roughness={0.4} metalness={0.6} />
               </mesh>
-              {/* Speaker Grille */}
               <mesh position={[-0.13, 0, 0]}>
                 <boxGeometry args={[0.02, 0.48, 0.32]} />
                 <meshStandardMaterial color="#1e222d" roughness={0.8} />
               </mesh>
-              {/* Dolby Blue Status LED */}
               <mesh position={[-0.14, -0.2, 0]}>
                 <boxGeometry args={[0.01, 0.03, 0.03]} />
                 <meshStandardMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={3} />
@@ -245,40 +216,30 @@ export default function TheaterRoom({ isLightsOn = true }) {
         </React.Fragment>
       ))}
 
-      {/* Horizontal LED Crown Cove Lighting along top of walls */}
-      <mesh position={[-11.9, 10.6, -0.4]}>
-        <boxGeometry args={[0.1, 0.06, 25.5]} />
+      {/* Horizontal LED Crown Cove Lighting */}
+      <mesh position={[-13.3, 10.6, -0.4]}>
+        <boxGeometry args={[0.08, 0.06, 26]} />
         <meshStandardMaterial color={coveGlowColor} emissive={coveGlowColor} emissiveIntensity={2.5} />
       </mesh>
-      <mesh position={[11.9, 10.6, -0.4]}>
-        <boxGeometry args={[0.1, 0.06, 25.5]} />
+      <mesh position={[13.3, 10.6, -0.4]}>
+        <boxGeometry args={[0.08, 0.06, 26]} />
         <meshStandardMaterial color={coveGlowColor} emissive={coveGlowColor} emissiveIntensity={2.5} />
       </mesh>
 
-      {/* ═══════ 7. REAR WALL WITH PROJECTION BOOTH & EXIT DOORS ═══════ */}
-      {/* Rear Wall Base */}
-      <mesh position={[0, 5.5, 12.6]}>
-        <boxGeometry args={[24.8, 12, 0.4]} />
+      {/* ═══════ 7. REAR WALL (INWARD FACING, NORMALS POINT -Z) ═══════ */}
+      {/* Rear Wall Plane (Points -Z inward toward screen; Invisible from behind so it NEVER blocks view!) */}
+      <mesh position={[0, 5.5, 13.2]} rotation={[0, Math.PI, 0]}>
+        <planeGeometry args={[27, 12]} />
         <meshStandardMaterial color={wallBaseColor} roughness={0.9} />
       </mesh>
 
-      {/* Rear Wall Acoustic Panels */}
-      {[-7.5, -4.5, 4.5, 7.5].map((x, i) => (
-        <mesh key={`rear-panel-${i}`} position={[x, 5.5, 12.35]}>
-          <boxGeometry args={[2.5, 9.8, 0.15]} />
-          <meshStandardMaterial color={panelColor} roughness={0.7} metalness={0.15} />
-        </mesh>
-      ))}
-
-      {/* Projectionist Booth Window (Centered high on rear wall) */}
-      <group position={[0, 7.2, 12.35]}>
-        {/* Booth Frame */}
+      {/* Projectionist Booth Window (Rendered on inside face) */}
+      <group position={[0, 7.2, 13.0]}>
         <mesh>
-          <boxGeometry args={[4.2, 1.6, 0.2]} />
+          <boxGeometry args={[4.2, 1.6, 0.1]} />
           <meshStandardMaterial color="#0a0c12" roughness={0.3} metalness={0.8} />
         </mesh>
-        {/* Booth Optical Glass Window */}
-        <mesh position={[0, 0, 0.08]}>
+        <mesh position={[0, 0, -0.06]}>
           <planeGeometry args={[3.8, 1.2]} />
           <meshStandardMaterial
             color="#0ea5e9"
@@ -288,88 +249,47 @@ export default function TheaterRoom({ isLightsOn = true }) {
             metalness={0.9}
           />
         </mesh>
-        {/* Projector Light Beam originating from booth */}
         <pointLight
-          position={[0, 0, -0.2]}
-          intensity={isLightsOn ? 12 : 25}
-          distance={18}
+          position={[0, 0, -0.3]}
+          intensity={isLightsOn ? 10 : 20}
+          distance={16}
           color="#bae6fd"
         />
       </group>
 
       {/* Left Emergency Exit Door */}
-      <group position={[-9.6, 1.8, 12.35]}>
-        {/* Door Frame */}
+      <group position={[-9.6, 1.8, 13.0]}>
         <mesh>
-          <boxGeometry args={[1.6, 3.2, 0.15]} />
+          <boxGeometry args={[1.6, 3.2, 0.1]} />
           <meshStandardMaterial color="#1a1c24" roughness={0.5} metalness={0.5} />
         </mesh>
-        {/* Door Panel */}
-        <mesh position={[0, 0, 0.05]}>
-          <boxGeometry args={[1.4, 3.0, 0.05]} />
+        <mesh position={[0, 0, -0.06]}>
+          <planeGeometry args={[1.4, 3.0]} />
           <meshStandardMaterial color="#0f1218" roughness={0.6} />
         </mesh>
-        {/* Push Bar */}
-        <mesh position={[0, -0.1, 0.12]}>
-          <boxGeometry args={[1.2, 0.06, 0.06]} />
-          <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={1.2} />
-        </mesh>
-        {/* Illuminated Green EXIT Sign */}
-        <mesh position={[0, 1.85, 0.1]}>
-          <boxGeometry args={[1.3, 0.4, 0.06]} />
+        <mesh position={[0, 1.85, -0.08]}>
+          <boxGeometry args={[1.3, 0.4, 0.04]} />
           <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={3.5} />
         </mesh>
-        <pointLight position={[0, 1.85, 0.3]} intensity={4} distance={4} color="#22c55e" />
       </group>
 
       {/* Right Emergency Exit Door */}
-      <group position={[9.6, 1.8, 12.35]}>
-        {/* Door Frame */}
+      <group position={[9.6, 1.8, 13.0]}>
         <mesh>
-          <boxGeometry args={[1.6, 3.2, 0.15]} />
+          <boxGeometry args={[1.6, 3.2, 0.1]} />
           <meshStandardMaterial color="#1a1c24" roughness={0.5} metalness={0.5} />
         </mesh>
-        {/* Door Panel */}
-        <mesh position={[0, 0, 0.05]}>
-          <boxGeometry args={[1.4, 3.0, 0.05]} />
+        <mesh position={[0, 0, -0.06]}>
+          <planeGeometry args={[1.4, 3.0]} />
           <meshStandardMaterial color="#0f1218" roughness={0.6} />
         </mesh>
-        {/* Push Bar */}
-        <mesh position={[0, -0.1, 0.12]}>
-          <boxGeometry args={[1.2, 0.06, 0.06]} />
-          <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={1.2} />
-        </mesh>
-        {/* Illuminated Green EXIT Sign */}
-        <mesh position={[0, 1.85, 0.1]}>
-          <boxGeometry args={[1.3, 0.4, 0.06]} />
+        <mesh position={[0, 1.85, -0.08]}>
+          <boxGeometry args={[1.3, 0.4, 0.04]} />
           <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={3.5} />
         </mesh>
-        <pointLight position={[0, 1.85, 0.3]} intensity={4} distance={4} color="#22c55e" />
       </group>
 
-      {/* ═══════ 8. CEILING ACOUSTIC CLOUDS & RECESSED SPOTLIGHTS ═══════ */}
-      {/* Stepped Floating Ceiling Panels */}
-      {[-8, -2, 4].map((z, idx) => (
-        <group key={`ceiling-cloud-${idx}`} position={[0, 11.2, z]}>
-          <mesh>
-            <boxGeometry args={[22, 0.25, 4.5]} />
-            <meshStandardMaterial color={isLightsOn ? '#171a24' : '#090b10'} roughness={0.9} />
-          </mesh>
-          {/* Recessed Lighting Pots */}
-          {[-6, 0, 6].map((x, j) => (
-            <mesh key={`recess-${j}`} position={[x, -0.14, 0]}>
-              <cylinderGeometry args={[0.25, 0.25, 0.04, 16]} />
-              <meshStandardMaterial
-                color={isLightsOn ? '#fef3c7' : '#38bdf8'}
-                emissive={isLightsOn ? '#fef3c7' : '#38bdf8'}
-                emissiveIntensity={isLightsOn ? 2.5 : 0.6}
-              />
-            </mesh>
-          ))}
-        </group>
-      ))}
-
-      {/* ═══════ 9. AUDITORIUM HOUSE DOWNLIGHTS ═══════ */}
+      {/* ═══════ 8. AUDITORIUM HOUSE DOWNLIGHTS ═══════ */}
       {isLightsOn && (
         <>
           <pointLight position={[0, 9.8, -7]} intensity={28} distance={18} color="#fef3c7" />

@@ -145,7 +145,7 @@ export default function App() {
       <div className="canvas-wrapper">
         <Canvas
           camera={{
-            position: [0, 10, 14],
+            position: [0, 7.5, 10.5],
             fov: 50,
             near: 0.1,
             far: 100,

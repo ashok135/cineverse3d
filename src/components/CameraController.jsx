@@ -5,22 +5,11 @@ import * as THREE from 'three'
 import gsap from 'gsap'
 
 /*
-  CameraController supports two distinct modes:
-
-  1. OVERVIEW MODE (Selecting / Browsing):
-     - Wide cinematic overview of the entire theater
-     - Free orbit, zoom, pan with OrbitControls
-     - Highlights selected seat
-
-  2. SITTING MODE (After Confirmation):
-     - Camera placed exactly at eye level in the confirmed seat:
-       x = seat.x, y = seat.y + 0.95, z = seat.z - 0.05
-     - Camera looks directly forward at the movie screen (z = -14)
-     - Restricted First-Person Head Look (yaw ±70°, pitch ±35°)
-       so you can look around the auditorium from your actual seat
-       without leaving the chair!
-     - Row A: Giant towering screen close-up view
-     - Row J: Distant balcony overview looking down at all 9 rows
+  CameraController:
+  - Overview Mode: Camera placed inside the auditorium volume looking down at seats & screen
+    * OrbitControls constrained inside room bounds so camera never clips outside
+    * Smooth GSAP transitions
+  - Sitting Mode: Eye level in confirmed seat facing the movie screen with head look
 */
 
 export default function CameraController({
@@ -43,9 +32,9 @@ export default function CameraController({
     startY: 0,
   })
 
-  // Overview camera defaults
-  const overviewPos = { x: 0, y: 10, z: 14 }
-  const overviewTarget = { x: 0, y: 1.5, z: -4 }
+  // Overview camera: Positioned inside auditorium at the top rear looking down at seats
+  const overviewPos = { x: 0, y: 7.5, z: 10.5 }
+  const overviewTarget = { x: 0, y: 2.0, z: -3.5 }
 
   // Active seat for sitting
   const activeSeat = confirmedSeat || selectedSeat
@@ -128,20 +117,18 @@ export default function CameraController({
       headLook.current.startX = e.clientX
       headLook.current.startY = e.clientY
 
-      // Convert to yaw and pitch with damping
       headLook.current.targetYaw -= dx * 0.003
       headLook.current.targetPitch -= dy * 0.0025
 
-      // Clamps: human neck limits
       headLook.current.targetYaw = THREE.MathUtils.clamp(
         headLook.current.targetYaw,
-        -Math.PI * 0.45, // ~80 degrees left
-        Math.PI * 0.45   // ~80 degrees right
+        -Math.PI * 0.45,
+        Math.PI * 0.45
       )
       headLook.current.targetPitch = THREE.MathUtils.clamp(
         headLook.current.targetPitch,
-        -Math.PI * 0.22, // look down ~40 degrees
-        Math.PI * 0.25   // look up ~45 degrees
+        -Math.PI * 0.22,
+        Math.PI * 0.25
       )
     }
 
@@ -168,21 +155,13 @@ export default function CameraController({
     const eyeY = sy + 0.95
     const eyeZ = sz - 0.05
 
-    // Smooth lerp for head look
     headLook.current.yaw += (headLook.current.targetYaw - headLook.current.yaw) * 0.08
     headLook.current.pitch += (headLook.current.targetPitch - headLook.current.pitch) * 0.08
 
-    // Screen is at [0, 4.5, -14]. Base view vector points towards screen:
-    // Screen direction vector from seat:
     const dirToScreen = new THREE.Vector3(0 - sx, 4.5 - eyeY, -14 - eyeZ).normalize()
-
-    // Apply pitch and yaw relative to screen direction
     const forward = dirToScreen.clone()
 
-    // Yaw rotation around Y axis
     forward.applyAxisAngle(new THREE.Vector3(0, 1, 0), headLook.current.yaw)
-
-    // Pitch rotation around right vector
     const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize()
     forward.applyAxisAngle(right, headLook.current.pitch)
 
@@ -196,10 +175,10 @@ export default function CameraController({
       enabled={!isSittingView}
       enableDamping
       dampingFactor={0.06}
-      maxPolarAngle={Math.PI / 2 - 0.05}
-      minPolarAngle={0.2}
+      maxPolarAngle={Math.PI / 2 - 0.08}
+      minPolarAngle={0.25}
       minDistance={3}
-      maxDistance={28}
+      maxDistance={20}
       target={[overviewTarget.x, overviewTarget.y, overviewTarget.z]}
     />
   )
