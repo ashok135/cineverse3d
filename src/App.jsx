@@ -97,7 +97,9 @@ export default function App() {
             onClick={() => setShowMovieModal(true)}
             title="Choose movie, multiplex & showtimes"
           >
-            🎬 Movies & Shows
+            <span className="btn-icon">🎬</span>
+            <span className="btn-text-full">Movies & Shows</span>
+            <span className="btn-text-short">Shows</span>
           </button>
 
           {/* 💡 Lights ON / 🎬 Lights OFF Toggle Button */}
@@ -106,19 +108,25 @@ export default function App() {
             onClick={() => setIsLightsOn(!isLightsOn)}
             title="Toggle Theater House Lights ON / OFF"
           >
-            {isLightsOn ? '💡 Lights ON' : '🎬 Movie Mode (Dim)'}
+            <span className="btn-icon">{isLightsOn ? '💡' : '🎬'}</span>
+            <span className="btn-text-full">{isLightsOn ? 'Lights ON' : 'Movie Mode (Dim)'}</span>
+            <span className="btn-text-short">{isLightsOn ? 'Lights' : 'Dim'}</span>
           </button>
 
           {isSittingView ? (
             <button className="header-btn overview-btn" onClick={handleExitSitting}>
-              🌐 Return to Overview
+              <span className="btn-icon">🌐</span>
+              <span className="btn-text-full">Return to Overview</span>
+              <span className="btn-text-short">Overview</span>
             </button>
           ) : activeSeat ? (
             <button
               className="header-btn sit-view-btn"
               onClick={() => handleConfirmAndSit(activeSeat)}
             >
-              🪑 Sit in Seat {activeSeat.id}
+              <span className="btn-icon">🪑</span>
+              <span className="btn-text-full">Sit in Seat {activeSeat.id}</span>
+              <span className="btn-text-short">Sit {activeSeat.id}</span>
             </button>
           ) : null}
 
@@ -127,7 +135,9 @@ export default function App() {
               className="header-btn ticket-btn"
               onClick={() => setShowTicketModal(true)}
             >
-              🎫 Ticket
+              <span className="btn-icon">🎫</span>
+              <span className="btn-text-full">Ticket</span>
+              <span className="btn-text-short">Ticket</span>
             </button>
           )}
         </div>

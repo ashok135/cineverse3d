@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 /*
   TopRightSeatMapWidget:
-  - Supports dynamic showtime seats array
-  - Matches the reference image layout:
-    - Tier labels with dividers
-    - Two-digit numbered pills (01, 02...)
-    - 3D trapezoidal cinema screen
-  - Live seat selection, confirmation, and stand-up buttons
+  - Responsive on both Desktop and Mobile devices
+  - Desktop: Floats in top-right corner
+  - Mobile (< 768px): Acts as a bottom sheet / drawer
+    * Starts as a compact bottom bar showing available count and selected seat
+    * Expands smoothly to show full seat map and trapezoid screen plate
+    * One-tap 'Confirm & Sit' thumb action
 */
 
 export default function TopRightSeatMapWidget({
@@ -23,7 +23,17 @@ export default function TopRightSeatMapWidget({
   onExitSitting,
   onOpenTicket,
 }) {
-  const [isMinimized, setIsMinimized] = useState(false)
+  // Start minimized on mobile so 3D scene is visible
+  const [isMinimized, setIsMinimized] = useState(() => {
+    return typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  })
+
+  // Auto-expand when a seat is clicked in 3D so user can see details
+  useEffect(() => {
+    if (selectedSeat && typeof window !== 'undefined' && window.innerWidth < 768) {
+      // Keep compact or show bottom action
+    }
+  }, [selectedSeat])
 
   // Map for fast seat lookup
   const seatLookup = new Map(seats.map((s) => [s.id, s]))
@@ -50,12 +60,17 @@ export default function TopRightSeatMapWidget({
   const availableCount = seats.filter((s) => !s.isOccupied).length
 
   return (
-    <div className={`tr-seatmap-widget ${isMinimized ? 'minimized' : ''}`}>
-      {/* Widget Header Bar */}
-      <div className="tr-widget-header">
+    <div className={`tr-seatmap-widget ${isMinimized ? 'minimized' : 'expanded'}`}>
+      {/* Mobile Drawer Pull Handle Indicator */}
+      <div className="tr-drag-handle" onClick={() => setIsMinimized(!isMinimized)}>
+        <span className="tr-handle-bar"></span>
+      </div>
+
+      {/* Widget Header Bar / Mobile Grab Handle */}
+      <div className="tr-widget-header" onClick={() => setIsMinimized(!isMinimized)}>
         <div className="tr-header-title">
           <span className="tr-dot"></span>
-          <span>SEAT LAYOUT</span>
+          <span className="tr-title-text">SEAT MAP</span>
           <span className="tr-avail-count">({availableCount} Free)</span>
           {activeSeat && (
             <span className="tr-active-pill">
@@ -65,13 +80,36 @@ export default function TopRightSeatMapWidget({
         </div>
         <button
           className="tr-min-btn"
-          onClick={() => setIsMinimized(!isMinimized)}
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsMinimized(!isMinimized)
+          }}
           title={isMinimized ? 'Expand Seat Map' : 'Minimize'}
         >
-          {isMinimized ? '⤢ Expand' : '—'}
+          {isMinimized ? '⤢ View Map' : '✕ Close'}
         </button>
       </div>
 
+      {/* Minimized Quick Action Bar for Mobile */}
+      {isMinimized && selectedSeat && (
+        <div className="tr-mini-quick-bar">
+          <div className="tr-quick-seat-info">
+            <span className="tr-quick-badge">{selectedSeat.id}</span>
+            <span className="tr-quick-price">₹{selectedSeat.price}</span>
+          </div>
+          <button
+            className="tr-quick-confirm-btn"
+            onClick={(e) => {
+              e.stopPropagation()
+              onConfirmAndSit(selectedSeat)
+            }}
+          >
+            Confirm & Sit 🪑
+          </button>
+        </div>
+      )}
+
+      {/* Expanded Body */}
       {!isMinimized && (
         <div className="tr-widget-body">
           {/* Movie & Showtime quick info banner */}
@@ -208,7 +246,7 @@ export default function TopRightSeatMapWidget({
               </div>
             ) : (
               <div className="tr-empty-hint">
-                Click any seat above or directly on 3D chair
+                Tap any seat above or directly on 3D chair
               </div>
             )}
           </div>

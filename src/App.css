@@ -1328,28 +1328,494 @@
   border-color: rgba(255, 255, 255, 0.25);
 }
 
-/* Responsiveness */
+/* ══════════════════════════════════════════════════
+   MOBILE & TABLET RESPONSIVE SYSTEM
+   ══════════════════════════════════════════════════ */
+
+/* Responsive Button Text Labels */
+.btn-text-short {
+  display: none;
+}
+
+.btn-text-full {
+  display: inline;
+}
+
+.btn-icon {
+  display: inline-block;
+  font-size: 0.95em;
+}
+
+/* Mobile Drawer Pull Handle Indicator */
+.tr-drag-handle {
+  display: none;
+  width: 100%;
+  padding: 8px 0 4px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.tr-handle-bar {
+  width: 38px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+}
+
+/* Minimized quick bar for mobile bottom sheet */
+.tr-mini-quick-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px 10px;
+  background: rgba(24, 27, 36, 0.96);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 10px;
+}
+
+.tr-quick-seat-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tr-quick-badge {
+  background: #f59e0b;
+  color: #000;
+  font-weight: 800;
+  font-size: 0.88rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.tr-quick-price {
+  font-weight: 800;
+  color: #38bdf8;
+  font-size: 0.9rem;
+}
+
+.tr-quick-confirm-btn {
+  flex: 1;
+  max-width: 170px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  transition: all 0.2s ease;
+}
+
+.tr-quick-confirm-btn:active {
+  transform: scale(0.97);
+}
+
+/* ──────────────────────────────────────────────────
+   TABLET & MOBILE SCREENS (<= 768px)
+   ────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .cinema-header {
-    padding: 0 16px;
+  /* Toggle short button labels */
+  .btn-text-full {
+    display: none;
   }
+  .btn-text-short {
+    display: inline;
+  }
+
+  /* Compact Header */
+  .cinema-header {
+    height: 56px;
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .brand {
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .brand-title {
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+  }
+
   .movie-badge {
     display: none;
   }
-  .tr-seatmap-widget {
-    top: auto;
-    bottom: 20px;
-    right: 16px;
-    left: 16px;
-    width: auto;
+
+  /* Horizontally scrollable button row for mobile */
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    max-width: calc(100vw - 125px);
+    padding: 4px 0;
   }
+
+  .header-actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .header-btn {
+    padding: 7px 11px;
+    font-size: 0.76rem;
+    min-height: 36px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    touch-action: manipulation;
+  }
+
+  .header-btn:active {
+    transform: scale(0.96);
+  }
+
+  /* Screen indicator compact */
+  .screen-indicator {
+    top: 60px;
+    transform: translateX(-50%) scale(0.85);
+  }
+
+  /* Seat map converted to Mobile Bottom Sheet Drawer */
+  .tr-seatmap-widget {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.75);
+    z-index: 50;
+    margin: 0;
+  }
+
+  .tr-drag-handle {
+    display: flex;
+  }
+
+  .tr-seatmap-widget.minimized {
+    height: auto;
+    max-height: none;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .tr-seatmap-widget.expanded {
+    max-height: 72vh;
+    display: flex;
+    flex-direction: column;
+    animation: bottomSheetSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes bottomSheetSlideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .tr-widget-header {
+    padding: 10px 16px;
+  }
+
+  .tr-widget-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .tr-tiers-scroll {
+    flex: 1;
+    max-height: 48vh;
+    overflow-y: auto;
+    overflow-x: auto;
+    padding: 10px 12px 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Touch-friendly Seat Pills on Mobile */
+  .tr-row {
+    gap: 3px;
+    justify-content: center;
+  }
+
+  .tr-seats-group {
+    gap: 3px;
+  }
+
+  .tr-seat-pill {
+    width: 24px;
+    height: 23px;
+    font-size: 0.64rem;
+    border-radius: 4px;
+    touch-action: manipulation;
+  }
+
+  .tr-seat-pill:active {
+    transform: scale(1.15);
+  }
+
+  .tr-aisle-spacer {
+    width: 8px;
+  }
+
+  .tr-row-tag {
+    width: 14px;
+    font-size: 0.65rem;
+  }
+
+  .tr-screen-plate {
+    width: 160px;
+    height: 20px;
+  }
+
+  .tr-widget-footer {
+    padding: 10px 16px;
+  }
+
+  .tr-action-btn {
+    padding: 11px;
+    font-size: 0.88rem;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  /* Discreet sitting mini pill on Mobile */
+  .sitting-mini-pill {
+    bottom: 64px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    transform: none;
+    font-size: 0.74rem;
+    padding: 8px 14px;
+    justify-content: space-between;
+    gap: 8px;
+    z-index: 45;
+  }
+
+  .pill-exit-btn {
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    min-height: 28px;
+    flex-shrink: 0;
+  }
+
+  /* Seat legend on mobile */
+  .cinema-legend {
+    bottom: 60px;
+    left: 12px;
+    padding: 6px 12px;
+    gap: 10px;
+    font-size: 0.72rem;
+    border-radius: 20px;
+    z-index: 25;
+  }
+
+  .legend-lights-btn {
+    font-size: 0.72rem;
+  }
+
+  /* Full-Screen Mobile Movie Modal */
+  .movie-modal-backdrop {
+    padding: 0;
+  }
+
+  .movie-modal-card {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+  }
+
+  .movie-modal-header {
+    padding: 14px 16px;
+  }
+
+  .movie-modal-title {
+    font-size: 1.15rem;
+  }
+
+  .movie-modal-body {
+    padding: 14px 16px;
+    gap: 16px;
+  }
+
+  .tmdb-key-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .tmdb-fetch-btn {
+    padding: 10px;
+    font-size: 0.85rem;
+    min-height: 40px;
+  }
+
+  /* Horizontal swipeable movie cards on mobile */
+  .movie-cards-grid {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .movie-card-item {
+    min-width: 110px;
+    width: 110px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+
+  .theaters-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .theater-item {
+    padding: 11px 14px;
+    touch-action: manipulation;
+  }
+
+  .showtimes-wrap {
+    gap: 8px;
+  }
+
+  .showtime-pill {
+    padding: 9px 14px;
+    min-height: 42px;
+    touch-action: manipulation;
+  }
+
+  .movie-modal-footer {
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .footer-summary {
+    font-size: 0.78rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    text-align: center;
+  }
+
+  .apply-movie-btn {
+    width: 100%;
+    padding: 13px;
+    font-size: 0.95rem;
+    min-height: 46px;
+    touch-action: manipulation;
+  }
+
+  /* E-Ticket Modal on Mobile */
+  .ticket-card {
+    width: calc(100vw - 28px);
+    max-width: 360px;
+    max-height: 92vh;
+    overflow-y: auto;
+    border-radius: 18px;
+  }
+
+  .ticket-body {
+    padding: 18px;
+  }
+
+  .movie-title {
+    font-size: 1.3rem;
+  }
+
+  .done-btn {
+    padding: 14px;
+    font-size: 0.95rem;
+    min-height: 48px;
+    touch-action: manipulation;
+  }
+
+  .secondary-btn {
+    padding: 12px;
+    min-height: 42px;
+    touch-action: manipulation;
+  }
+}
+
+/* ──────────────────────────────────────────────────
+   SMALL PHONES (<= 480px)
+   ────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .cinema-header {
+    height: 52px;
+    padding: 0 10px;
+  }
+
+  .brand-title {
+    font-size: 0.88rem;
+    letter-spacing: 0.5px;
+  }
+
+  .brand-dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .header-actions {
+    max-width: calc(100vw - 110px);
+    gap: 4px;
+  }
+
+  .header-btn {
+    padding: 6px 9px;
+    font-size: 0.72rem;
+    min-height: 34px;
+  }
+
+  .tr-seat-pill {
+    width: 22px;
+    height: 21px;
+    font-size: 0.58rem;
+  }
+
+  .tr-aisle-spacer {
+    width: 6px;
+  }
+
+  .tr-row-tag {
+    width: 11px;
+    font-size: 0.6rem;
+  }
+
   .cinema-legend {
     display: none;
   }
-  .movie-modal-card {
-    max-height: 94vh;
-  }
-  .theaters-grid {
-    grid-template-columns: 1fr;
+
+  .sitting-mini-pill {
+    bottom: 56px;
+    font-size: 0.7rem;
+    padding: 6px 10px;
   }
 }
+
