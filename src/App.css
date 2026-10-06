@@ -1329,10 +1329,22 @@
 }
 
 /* ══════════════════════════════════════════════════
-   MOBILE & TABLET RESPONSIVE SYSTEM
+   MOBILE & RESPONSIVE COMPONENT RULES
    ══════════════════════════════════════════════════ */
 
-/* Responsive Button Text Labels */
+/* Desktop & Default Display States */
+.desktop-only {
+  display: flex;
+}
+
+.mobile-movie-chip {
+  display: none;
+}
+
+.tr-mobile-single-bar {
+  display: none;
+}
+
 .btn-text-short {
   display: none;
 }
@@ -1354,71 +1366,27 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.28);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .tr-handle-bar {
   width: 38px;
   height: 4px;
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.35);
   border-radius: 4px;
-}
-
-/* Minimized quick bar for mobile bottom sheet */
-.tr-mini-quick-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 14px 10px;
-  background: rgba(24, 27, 36, 0.96);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  gap: 10px;
-}
-
-.tr-quick-seat-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.tr-quick-badge {
-  background: #f59e0b;
-  color: #000;
-  font-weight: 800;
-  font-size: 0.88rem;
-  padding: 3px 8px;
-  border-radius: 6px;
-}
-
-.tr-quick-price {
-  font-weight: 800;
-  color: #38bdf8;
-  font-size: 0.9rem;
-}
-
-.tr-quick-confirm-btn {
-  flex: 1;
-  max-width: 170px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 9px 14px;
-  font-weight: 700;
-  font-size: 0.82rem;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-  transition: all 0.2s ease;
-}
-
-.tr-quick-confirm-btn:active {
-  transform: scale(0.97);
 }
 
 /* ──────────────────────────────────────────────────
    TABLET & MOBILE SCREENS (<= 768px)
    ────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  /* Hide desktop-only elements */
+  .movie-badge,
+  .movie-badge.clickable,
+  .desktop-only {
+    display: none !important;
+  }
+
   /* Toggle short button labels */
   .btn-text-full {
     display: none;
@@ -1427,11 +1395,15 @@
     display: inline;
   }
 
-  /* Compact Header */
+  /* Compact Native-Feel Header */
   .cinema-header {
-    height: 56px;
-    padding: 0 12px;
+    height: 52px;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 8px;
+    background: linear-gradient(180deg, rgba(8, 9, 12, 0.96) 0%, rgba(8, 9, 12, 0) 100%);
   }
 
   .brand {
@@ -1440,15 +1412,17 @@
   }
 
   .brand-title {
-    font-size: 0.95rem;
-    letter-spacing: 1px;
+    font-size: 0.92rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
   }
 
-  .movie-badge {
-    display: none;
+  .brand-dot {
+    width: 8px;
+    height: 8px;
   }
 
-  /* Horizontally scrollable button row for mobile */
+  /* Header action buttons on mobile */
   .header-actions {
     display: flex;
     align-items: center;
@@ -1456,8 +1430,9 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    max-width: calc(100vw - 125px);
-    padding: 4px 0;
+    max-width: calc(100vw - 120px);
+    padding: 2px 0;
+    flex-shrink: 0;
   }
 
   .header-actions::-webkit-scrollbar {
@@ -1465,13 +1440,13 @@
   }
 
   .header-btn {
-    padding: 7px 11px;
-    font-size: 0.76rem;
-    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 0.74rem;
+    min-height: 34px;
     border-radius: 8px;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     white-space: nowrap;
     flex-shrink: 0;
     touch-action: manipulation;
@@ -1481,13 +1456,78 @@
     transform: scale(0.96);
   }
 
-  /* Screen indicator compact */
-  .screen-indicator {
-    top: 60px;
-    transform: translateX(-50%) scale(0.85);
+  /* ── Sleek Centered Mobile Movie Chip ── */
+  .mobile-movie-chip {
+    position: absolute;
+    top: 58px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(18, 22, 32, 0.88);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    padding: 6px 14px;
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55);
+    cursor: pointer;
+    pointer-events: auto;
+    transition: all 0.2s ease;
+    max-width: 90vw;
+    white-space: nowrap;
   }
 
-  /* Seat map converted to Mobile Bottom Sheet Drawer */
+  .mobile-movie-chip:active {
+    transform: translateX(-50%) scale(0.96);
+    border-color: #38bdf8;
+    background: rgba(24, 30, 44, 0.95);
+  }
+
+  .mm-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 6px #10b981;
+    flex-shrink: 0;
+  }
+
+  .mm-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #f8fafc;
+    letter-spacing: 0.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+  }
+
+  .mm-sep {
+    color: #64748b;
+    font-size: 0.75rem;
+  }
+
+  .mm-time {
+    font-size: 0.75rem;
+    color: #38bdf8;
+    font-weight: 700;
+  }
+
+  .mm-arrow {
+    font-size: 0.6rem;
+    color: #94a3b8;
+    margin-left: 1px;
+  }
+
+  /* ── Screen indicator position on mobile (Safe below chip) ── */
+  .screen-indicator {
+    top: 98px;
+    transform: translateX(-50%) scale(0.8);
+  }
+
+  /* ── Mobile Bottom Sheet Drawer ── */
   .tr-seatmap-widget {
     position: fixed;
     top: auto;
@@ -1497,26 +1537,32 @@
     width: 100% !important;
     max-width: 100% !important;
     border-radius: 20px 20px 0 0;
-    border-bottom: none;
-    border-left: none;
-    border-right: none;
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.75);
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    background: #151824;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
     z-index: 50;
     margin: 0;
+    overflow: hidden;
   }
 
   .tr-drag-handle {
     display: flex;
   }
 
+  /* Minimized State: Only drag handle and single unified bar */
   .tr-seatmap-widget.minimized {
     height: auto;
     max-height: none;
-    border-radius: 16px 16px 0 0;
+    border-radius: 18px 18px 0 0;
+  }
+
+  .tr-seatmap-widget.minimized .tr-widget-header {
+    display: none !important;
   }
 
   .tr-seatmap-widget.expanded {
-    max-height: 72vh;
+    max-height: 74vh;
     display: flex;
     flex-direction: column;
     animation: bottomSheetSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1531,8 +1577,135 @@
     }
   }
 
+  /* ── Unified Single Bottom Bar on Mobile ── */
+  .tr-mobile-single-bar {
+    display: flex;
+    width: 100%;
+    padding: 8px 14px 10px;
+    cursor: pointer;
+    background: rgba(18, 22, 32, 0.98);
+  }
+
+  .tr-msb-content {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  /* With selected seat */
+  .tr-msb-seat-info {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .tr-msb-badge {
+    background: #f59e0b;
+    color: #000000;
+    font-weight: 800;
+    font-size: 1.05rem;
+    padding: 4px 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+  }
+
+  .tr-msb-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .tr-msb-price {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #38bdf8;
+  }
+
+  .tr-msb-row {
+    font-size: 0.68rem;
+    color: #94a3b8;
+  }
+
+  .tr-msb-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tr-msb-map-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #cbd5e1;
+    font-weight: 700;
+    font-size: 0.78rem;
+    padding: 8px 11px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .tr-msb-confirm-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border: none;
+    font-weight: 800;
+    font-size: 0.82rem;
+    padding: 9px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.45);
+    white-space: nowrap;
+  }
+
+  .tr-msb-confirm-btn:active {
+    transform: scale(0.96);
+  }
+
+  /* Empty state */
+  .tr-msb-avail-info {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .tr-msb-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+    animation: pulseDot 1.5s infinite;
+  }
+
+  .tr-msb-count-text {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #f1f5f9;
+  }
+
+  .tr-msb-hint {
+    font-size: 0.67rem;
+    color: #64748b;
+  }
+
+  .tr-msb-open-btn {
+    background: rgba(56, 189, 248, 0.16);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #38bdf8;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* Expanded sheet body */
   .tr-widget-header {
     padding: 10px 16px;
+    background: rgba(0, 0, 0, 0.3);
   }
 
   .tr-widget-body {
@@ -1544,14 +1717,14 @@
 
   .tr-tiers-scroll {
     flex: 1;
-    max-height: 48vh;
+    max-height: 50vh;
     overflow-y: auto;
     overflow-x: auto;
     padding: 10px 12px 6px;
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Touch-friendly Seat Pills on Mobile */
+  /* Seat Pills centered on Mobile */
   .tr-row {
     gap: 3px;
     justify-content: center;
@@ -1589,6 +1762,7 @@
 
   .tr-widget-footer {
     padding: 10px 16px;
+    background: rgba(0, 0, 0, 0.4);
   }
 
   .tr-action-btn {
@@ -1621,17 +1795,7 @@
 
   /* Seat legend on mobile */
   .cinema-legend {
-    bottom: 60px;
-    left: 12px;
-    padding: 6px 12px;
-    gap: 10px;
-    font-size: 0.72rem;
-    border-radius: 20px;
-    z-index: 25;
-  }
-
-  .legend-lights-btn {
-    font-size: 0.72rem;
+    display: none;
   }
 
   /* Full-Screen Mobile Movie Modal */
@@ -1768,29 +1932,29 @@
    ────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .cinema-header {
-    height: 52px;
+    height: 50px;
     padding: 0 10px;
   }
 
   .brand-title {
-    font-size: 0.88rem;
-    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+    letter-spacing: 0.4px;
   }
 
   .brand-dot {
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
   }
 
   .header-actions {
-    max-width: calc(100vw - 110px);
+    max-width: calc(100vw - 105px);
     gap: 4px;
   }
 
   .header-btn {
-    padding: 6px 9px;
-    font-size: 0.72rem;
-    min-height: 34px;
+    padding: 5px 8px;
+    font-size: 0.7rem;
+    min-height: 32px;
   }
 
   .tr-seat-pill {
@@ -1808,14 +1972,11 @@
     font-size: 0.6rem;
   }
 
-  .cinema-legend {
-    display: none;
-  }
-
   .sitting-mini-pill {
     bottom: 56px;
     font-size: 0.7rem;
     padding: 6px 10px;
   }
 }
+
 

@@ -80,9 +80,9 @@ export default function App() {
           <span className="brand-title">CINEVERSE 3D</span>
         </div>
 
-        {/* Clickable Movie & Showtime Badge */}
+        {/* Clickable Movie & Showtime Badge (Desktop) */}
         <div
-          className="movie-badge clickable"
+          className="movie-badge desktop-only clickable"
           onClick={() => setShowMovieModal(true)}
           title="Click to change movie, multiplex, or showtime"
         >
@@ -142,6 +142,19 @@ export default function App() {
           )}
         </div>
       </header>
+
+      {/* ── Mobile Movie & Showtime Chip (Only on Mobile) ── */}
+      <div
+        className="mobile-movie-chip"
+        onClick={() => setShowMovieModal(true)}
+        title="Tap to change movie, multiplex, or showtime"
+      >
+        <span className="mm-dot"></span>
+        <span className="mm-title">{activeMovie.title}</span>
+        <span className="mm-sep">·</span>
+        <span className="mm-time">{activeShowtime}</span>
+        <span className="mm-arrow">▼</span>
+      </div>
 
       {/* ── Screen Direction Indicator (Only in Overview Mode) ── */}
       {!isSittingView && (

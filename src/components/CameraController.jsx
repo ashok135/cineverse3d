@@ -32,15 +32,40 @@ export default function CameraController({
     startY: 0,
   })
 
-  // Overview camera: Positioned inside auditorium at the top rear looking down at seats
-  const overviewPos = { x: 0, y: 7.5, z: 10.5 }
-  const overviewTarget = { x: 0, y: 2.0, z: -3.5 }
+  // Calculate camera overview parameters based on mobile viewport
+  const getOverviewConfig = () => {
+    const isMobilePortrait = typeof window !== 'undefined' && window.innerWidth < 768
+    return {
+      pos: isMobilePortrait ? { x: 0, y: 10.2, z: 14.8 } : { x: 0, y: 7.5, z: 10.5 },
+      target: isMobilePortrait ? { x: 0, y: 1.8, z: -2.0 } : { x: 0, y: 2.0, z: -3.5 },
+      fov: isMobilePortrait ? 66 : 50,
+      sittingFov: isMobilePortrait ? 64 : 58,
+    }
+  }
 
   // Active seat for sitting
   const activeSeat = confirmedSeat || selectedSeat
 
+  // Auto-adjust FOV on window resize / orientation change
+  useEffect(() => {
+    const handleResize = () => {
+      if (!isSittingView) {
+        const cfg = getOverviewConfig()
+        camera.fov = cfg.fov
+        camera.updateProjectionMatrix()
+        if (controlsRef.current) {
+          controlsRef.current.target.set(cfg.target.x, cfg.target.y, cfg.target.z)
+        }
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [isSittingView, camera])
+
   // Handle Mode Transitions
   useEffect(() => {
+    const cfg = getOverviewConfig()
+
     if (isSittingView && activeSeat) {
       // ─── TRANSITION TO FIRST-PERSON SEAT VIEW ───
       const [sx, sy, sz] = activeSeat.position
@@ -67,16 +92,16 @@ export default function CameraController({
         controlsRef.current.enabled = false
       }
 
-      // Slightly increase FOV to 58 for natural human sitting perspective
+      // Natural human sitting perspective FOV
       gsap.to(camera, {
-        fov: 58,
+        fov: cfg.sittingFov,
         duration: 1.5,
         onUpdate: () => camera.updateProjectionMatrix(),
       })
     } else {
       // ─── TRANSITION TO OVERVIEW ───
       gsap.to(camera.position, {
-        ...overviewPos,
+        ...cfg.pos,
         duration: 1.8,
         ease: 'power3.inOut',
       })
@@ -84,14 +109,14 @@ export default function CameraController({
       if (controlsRef.current) {
         controlsRef.current.enabled = true
         gsap.to(controlsRef.current.target, {
-          ...overviewTarget,
+          ...cfg.target,
           duration: 1.8,
           ease: 'power3.inOut',
         })
       }
 
       gsap.to(camera, {
-        fov: 50,
+        fov: cfg.fov,
         duration: 1.5,
         onUpdate: () => camera.updateProjectionMatrix(),
       })
@@ -169,6 +194,8 @@ export default function CameraController({
     camera.lookAt(lookTarget)
   })
 
+  const currentCfg = getOverviewConfig()
+
   return (
     <OrbitControls
       ref={controlsRef}
@@ -178,8 +205,8 @@ export default function CameraController({
       maxPolarAngle={Math.PI / 2 - 0.08}
       minPolarAngle={0.25}
       minDistance={3}
-      maxDistance={20}
-      target={[overviewTarget.x, overviewTarget.y, overviewTarget.z]}
+      maxDistance={22}
+      target={[currentCfg.target.x, currentCfg.target.y, currentCfg.target.z]}
     />
   )
 }

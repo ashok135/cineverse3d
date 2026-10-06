@@ -66,46 +66,88 @@ export default function TopRightSeatMapWidget({
         <span className="tr-handle-bar"></span>
       </div>
 
-      {/* Widget Header Bar / Mobile Grab Handle */}
-      <div className="tr-widget-header" onClick={() => setIsMinimized(!isMinimized)}>
-        <div className="tr-header-title">
-          <span className="tr-dot"></span>
-          <span className="tr-title-text">SEAT MAP</span>
-          <span className="tr-avail-count">({availableCount} Free)</span>
-          {activeSeat && (
-            <span className="tr-active-pill">
-              {activeSeat.id}
-            </span>
-          )}
-        </div>
-        <button
-          className="tr-min-btn"
-          onClick={(e) => {
-            e.stopPropagation()
-            setIsMinimized(!isMinimized)
-          }}
-          title={isMinimized ? 'Expand Seat Map' : 'Minimize'}
-        >
-          {isMinimized ? '⤢ View Map' : '✕ Close'}
-        </button>
-      </div>
-
-      {/* Minimized Quick Action Bar for Mobile */}
-      {isMinimized && selectedSeat && (
-        <div className="tr-mini-quick-bar">
-          <div className="tr-quick-seat-info">
-            <span className="tr-quick-badge">{selectedSeat.id}</span>
-            <span className="tr-quick-price">₹{selectedSeat.price}</span>
+      {/* ── Desktop & Expanded Header ── */}
+      {(!isMinimized || typeof window === 'undefined' || window.innerWidth >= 768) && (
+        <div className="tr-widget-header" onClick={() => setIsMinimized(!isMinimized)}>
+          <div className="tr-header-title">
+            <span className="tr-dot"></span>
+            <span className="tr-title-text">SEAT MAP</span>
+            <span className="tr-avail-count">({availableCount} Free)</span>
+            {activeSeat && (
+              <span className="tr-active-pill">
+                {activeSeat.id}
+              </span>
+            )}
           </div>
           <button
-            className="tr-quick-confirm-btn"
+            className="tr-min-btn"
             onClick={(e) => {
               e.stopPropagation()
-              onConfirmAndSit(selectedSeat)
+              setIsMinimized(!isMinimized)
             }}
+            title={isMinimized ? 'Expand Seat Map' : 'Minimize'}
           >
-            Confirm & Sit 🪑
+            {isMinimized ? '⤢ View Map' : '✕ Close'}
           </button>
+        </div>
+      )}
+
+      {/* ── Mobile Minimized Single Floating Bar (Unified 1-Row Card) ── */}
+      {isMinimized && (
+        <div className="tr-mobile-single-bar" onClick={() => setIsMinimized(false)}>
+          {selectedSeat ? (
+            /* State A: A seat is selected */
+            <div className="tr-msb-content has-selection">
+              <div className="tr-msb-seat-info">
+                <span className="tr-msb-badge">{selectedSeat.id}</span>
+                <div className="tr-msb-text">
+                  <span className="tr-msb-price">₹{selectedSeat.price}</span>
+                  <span className="tr-msb-row">Row {selectedSeat.row} · {selectedSeat.section}</span>
+                </div>
+              </div>
+              <div className="tr-msb-actions">
+                <button
+                  className="tr-msb-map-btn"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setIsMinimized(false)
+                  }}
+                  title="Open Seat Map"
+                >
+                  ⤢ Map
+                </button>
+                <button
+                  className="tr-msb-confirm-btn"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onConfirmAndSit(selectedSeat)
+                  }}
+                >
+                  Confirm & Sit 🪑
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* State B: No seat selected yet */
+            <div className="tr-msb-content empty">
+              <div className="tr-msb-avail-info">
+                <span className="tr-msb-dot"></span>
+                <div className="tr-msb-text">
+                  <span className="tr-msb-count-text">{availableCount} Seats Free</span>
+                  <span className="tr-msb-hint">Tap any 3D chair or map</span>
+                </div>
+              </div>
+              <button
+                className="tr-msb-open-btn"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsMinimized(false)
+                }}
+              >
+                ⤢ View Seat Map
+              </button>
+            </div>
+          )}
         </div>
       )}
 
