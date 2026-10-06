@@ -20,6 +20,10 @@ export default function CinemaScene({
   confirmedSeat,
   isSittingView,
   isLightsOn = true,
+  videoIndex = 0,
+  videoElement,
+  isMuted = true,
+  onNextVideo,
   onSelectSeat,
   onExitSitting,
 }) {
@@ -83,11 +87,16 @@ export default function CinemaScene({
       {/* ══════════ THEATER ENVIRONMENT ══════════ */}
       <TheaterRoom isLightsOn={isLightsOn} />
 
-      {/* ══════════ DYNAMIC MOVIE SCREEN ══════════ */}
+      {/* ══════════ DYNAMIC MOVIE SCREEN (ZERO SHADOW + VIDEO) ══════════ */}
       <Screen
         movie={movie}
         theater={theater}
         showtime={showtime}
+        videoIndex={videoIndex}
+        videoElement={videoElement}
+        isMuted={isMuted}
+        isLightsOn={isLightsOn}
+        onNextVideo={onNextVideo}
         position={[0, 4.5, -14]}
       />
 

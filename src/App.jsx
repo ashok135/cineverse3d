@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import CinemaScene from './components/CinemaScene'
 import TopRightSeatMapWidget from './components/TopRightSeatMapWidget'
 import ConfirmationModal from './components/ConfirmationModal'
 import MovieSelectorModal from './components/MovieSelectorModal'
+import { LOCAL_VIDEOS } from './components/Screen'
 import { TMDB_MOVIES, THEATERS, SHOWTIMES, generateShowtimeOccupiedSeats } from './services/movieApi'
 import { createSeatsWithOccupancy } from './data/cinemaData'
 import './App.css'
@@ -50,11 +51,64 @@ export default function App() {
     setIsSittingView(false)
   }
 
+  // ── Video and Audio States for Movie Screen ──
+  const [videoIndex, setVideoIndex] = useState(0)
+  const [isMuted, setIsMuted] = useState(true)
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+  const videoRef = useRef(null)
+
+  const currentVideo = LOCAL_VIDEOS[videoIndex % LOCAL_VIDEOS.length]
+
+  const handleNextVideo = () => {
+    setVideoIndex((prev) => (prev + 1) % LOCAL_VIDEOS.length)
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play().then(() => setIsVideoPlaying(true)).catch(() => {})
+      }
+    }, 50)
+  }
+
+  const handleToggleSound = () => {
+    const nextMuted = !isMuted
+    setIsMuted(nextMuted)
+    if (videoRef.current) {
+      videoRef.current.muted = nextMuted
+      videoRef.current.play().then(() => setIsVideoPlaying(true)).catch(() => {})
+    }
+  }
+
+  // Ensure playback starts on first touch/click anywhere
+  useEffect(() => {
+    const video = videoRef.current
+    if (video) {
+      video.muted = isMuted
+      video.play().then(() => setIsVideoPlaying(true)).catch(() => {
+        // Fallback to muted auto-play
+        video.muted = true
+        video.play().then(() => setIsVideoPlaying(true)).catch(() => {})
+      })
+    }
+
+    const startPlayOnGesture = () => {
+      if (videoRef.current && videoRef.current.paused) {
+        videoRef.current.play().then(() => setIsVideoPlaying(true)).catch(() => {})
+      }
+    }
+
+    window.addEventListener('click', startPlayOnGesture)
+    window.addEventListener('touchstart', startPlayOnGesture)
+    return () => {
+      window.removeEventListener('click', startPlayOnGesture)
+      window.removeEventListener('touchstart', startPlayOnGesture)
+    }
+  }, [currentVideo.src])
+
   // Handle Movie/Theater/Showtime Change
   const handleApplyMovieSelection = (newMovie, newTheater, newShowtime) => {
     setActiveMovie(newMovie)
     setActiveTheater(newTheater)
     setActiveShowtime(newShowtime)
+    setVideoIndex((prev) => (prev + 1) % LOCAL_VIDEOS.length)
     // Reset any previously selected seat since new show has its own layout occupancy
     setSelectedSeat(null)
     setConfirmedSeat(null)
@@ -100,6 +154,28 @@ export default function App() {
             <span className="btn-icon">🎬</span>
             <span className="btn-text-full">Movies & Shows</span>
             <span className="btn-text-short">Shows</span>
+          </button>
+
+          {/* 🎲 Video Switcher Button */}
+          <button
+            className="header-btn video-switch-btn"
+            onClick={handleNextVideo}
+            title="Play next random movie trailer on 3D screen"
+          >
+            <span className="btn-icon">🎲</span>
+            <span className="btn-text-full">Change Video</span>
+            <span className="btn-text-short">Video</span>
+          </button>
+
+          {/* 🔊 / 🔇 Sound Toggle Button */}
+          <button
+            className={`header-btn sound-toggle-btn ${!isMuted ? 'sound-on' : ''}`}
+            onClick={handleToggleSound}
+            title={isMuted ? 'Unmute Theater Audio' : 'Mute Theater Audio'}
+          >
+            <span className="btn-icon">{isMuted ? '🔇' : '🔊'}</span>
+            <span className="btn-text-full">{isMuted ? 'Audio Muted' : 'Sound ON'}</span>
+            <span className="btn-text-short">{isMuted ? 'Mute' : 'Sound'}</span>
           </button>
 
           {/* 💡 Lights ON / 🎬 Lights OFF Toggle Button */}
@@ -164,6 +240,45 @@ export default function App() {
         </div>
       )}
 
+      {/* ── Native HTML5 Video Element for 3D VideoTexture Projection ── */}
+      <video
+        ref={videoRef}
+        id="cinema-active-video"
+        src={currentVideo.src}
+        loop
+        playsInline
+        muted={isMuted}
+        autoPlay
+        crossOrigin="anonymous"
+        onPlay={() => setIsVideoPlaying(true)}
+        onPause={() => setIsVideoPlaying(false)}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '4px',
+          height: '4px',
+          opacity: 0.01,
+          pointerEvents: 'none',
+          zIndex: -999,
+        }}
+      />
+
+      {/* ── Tap to Play Overlay (if browser blocked auto-play) ── */}
+      {!isVideoPlaying && (
+        <button
+          className="play-video-overlay-btn"
+          onClick={() => {
+            if (videoRef.current) {
+              videoRef.current.play().then(() => setIsVideoPlaying(true)).catch(() => {})
+            }
+          }}
+          title="Start video projection"
+        >
+          ▶ Tap to Start Video
+        </button>
+      )}
+
       {/* ── Full-Viewport 3D Canvas ── */}
       <div className="canvas-wrapper">
         <Canvas
@@ -187,6 +302,10 @@ export default function App() {
             confirmedSeat={confirmedSeat}
             isSittingView={isSittingView}
             isLightsOn={isLightsOn}
+            videoIndex={videoIndex}
+            videoElement={videoRef.current}
+            isMuted={isMuted}
+            onNextVideo={handleNextVideo}
             onSelectSeat={handleSelectSeat}
             onExitSitting={handleExitSitting}
           />
