@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react'
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { Canvas } from '@react-three/fiber'
 import CinemaScene from './components/CinemaScene'
 import TopRightSeatMapWidget from './components/TopRightSeatMapWidget'
@@ -55,54 +55,78 @@ export default function App() {
   const [videoIndex, setVideoIndex] = useState(0)
   const [isMuted, setIsMuted] = useState(true)
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
-  const videoRef = useRef(null)
+  const activeVideoRef = useRef(null)
+  const isMutedRef = useRef(isMuted)
+
+  useEffect(() => {
+    isMutedRef.current = isMuted
+  }, [isMuted])
 
   const currentVideo = LOCAL_VIDEOS[videoIndex % LOCAL_VIDEOS.length]
 
-  const handleNextVideo = () => {
-    setVideoIndex((prev) => (prev + 1) % LOCAL_VIDEOS.length)
-    setTimeout(() => {
-      if (videoRef.current) {
-        videoRef.current.play().then(() => setIsVideoPlaying(true)).catch(() => {})
-      }
-    }, 50)
-  }
+  const handleVideoReady = useCallback((video) => {
+    if (!video) return
+    activeVideoRef.current = video
+    video.muted = isMutedRef.current
 
-  const handleToggleSound = () => {
-    const nextMuted = !isMuted
-    setIsMuted(nextMuted)
-    if (videoRef.current) {
-      videoRef.current.muted = nextMuted
-      videoRef.current.play().then(() => setIsVideoPlaying(true)).catch(() => {})
+    const syncState = () => {
+      setIsVideoPlaying(!video.paused)
     }
-  }
+
+    video.removeEventListener('play', syncState)
+    video.removeEventListener('playing', syncState)
+    video.removeEventListener('pause', syncState)
+    video.removeEventListener('ended', syncState)
+
+    video.addEventListener('play', syncState)
+    video.addEventListener('playing', syncState)
+    video.addEventListener('pause', syncState)
+    video.addEventListener('ended', syncState)
+
+    syncState()
+
+    if (video.paused) {
+      video.play().then(() => {
+        setIsVideoPlaying(true)
+      }).catch(() => {
+        setIsVideoPlaying(false)
+      })
+    }
+  }, [])
+
+  const handleNextVideo = useCallback(() => {
+    setVideoIndex((prev) => (prev + 1) % LOCAL_VIDEOS.length)
+  }, [])
+
+  const handleToggleSound = useCallback(() => {
+    setIsMuted((prev) => {
+      const nextMuted = !prev
+      isMutedRef.current = nextMuted
+      if (activeVideoRef.current) {
+        activeVideoRef.current.muted = nextMuted
+        if (!nextMuted && activeVideoRef.current.paused) {
+          activeVideoRef.current.play().then(() => setIsVideoPlaying(true)).catch(() => {})
+        }
+      }
+      return nextMuted
+    })
+  }, [])
 
   // Ensure playback starts on first touch/click anywhere
   useEffect(() => {
-    const video = videoRef.current
-    if (video) {
-      video.muted = isMuted
-      video.play().then(() => setIsVideoPlaying(true)).catch(() => {
-        // Fallback to muted auto-play
-        video.muted = true
-        video.play().then(() => setIsVideoPlaying(true)).catch(() => {})
-      })
-    }
-
     const startPlayOnGesture = () => {
-      if (videoRef.current && videoRef.current.paused) {
-        videoRef.current.play().then(() => setIsVideoPlaying(true)).catch(() => {})
+      if (activeVideoRef.current && activeVideoRef.current.paused) {
+        activeVideoRef.current.play().then(() => setIsVideoPlaying(true)).catch(() => {})
       }
     }
 
-    window.addEventListener('click', startPlayOnGesture)
-    window.addEventListener('touchstart', startPlayOnGesture)
+    window.addEventListener("click", startPlayOnGesture)
+    window.addEventListener("touchstart", startPlayOnGesture)
     return () => {
-      window.removeEventListener('click', startPlayOnGesture)
-      window.removeEventListener('touchstart', startPlayOnGesture)
+      window.removeEventListener("click", startPlayOnGesture)
+      window.removeEventListener("touchstart", startPlayOnGesture)
     }
-  }, [currentVideo.src])
-
+  }, [])
   // Handle Movie/Theater/Showtime Change
   const handleApplyMovieSelection = (newMovie, newTheater, newShowtime) => {
     setActiveMovie(newMovie)
@@ -232,45 +256,19 @@ export default function App() {
         <span className="mm-arrow">▼</span>
       </div>
 
-      {/* ── Screen Direction Indicator (Only in Overview Mode) ── */}
-      {!isSittingView && (
-        <div className="screen-indicator">
-          <div className="screen-curve" style={{ borderColor: activeMovie.themeColor }}></div>
-          <span>SCREEN (FRONT)</span>
-        </div>
-      )}
-
-      {/* ── Native HTML5 Video Element for 3D VideoTexture Projection ── */}
-      <video
-        ref={videoRef}
-        id="cinema-active-video"
-        src={currentVideo.src}
-        loop
-        playsInline
-        muted={isMuted}
-        autoPlay
-        crossOrigin="anonymous"
-        onPlay={() => setIsVideoPlaying(true)}
-        onPause={() => setIsVideoPlaying(false)}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '4px',
-          height: '4px',
-          opacity: 0.01,
-          pointerEvents: 'none',
-          zIndex: -999,
-        }}
-      />
 
       {/* ── Tap to Play Overlay (if browser blocked auto-play) ── */}
       {!isVideoPlaying && (
         <button
           className="play-video-overlay-btn"
-          onClick={() => {
-            if (videoRef.current) {
-              videoRef.current.play().then(() => setIsVideoPlaying(true)).catch(() => {})
+          onClick={(e) => {
+            e.stopPropagation()
+            if (activeVideoRef.current) {
+              activeVideoRef.current.play().then(() => {
+                setIsVideoPlaying(true)
+              }).catch((err) => {
+                console.warn('Playback blocked by browser policy:', err)
+              })
             }
           }}
           title="Start video projection"
@@ -303,7 +301,7 @@ export default function App() {
             isSittingView={isSittingView}
             isLightsOn={isLightsOn}
             videoIndex={videoIndex}
-            videoElement={videoRef.current}
+            onVideoReady={handleVideoReady}
             isMuted={isMuted}
             onNextVideo={handleNextVideo}
             onSelectSeat={handleSelectSeat}

@@ -21,8 +21,8 @@ export default function CinemaScene({
   isSittingView,
   isLightsOn = true,
   videoIndex = 0,
-  videoElement,
   isMuted = true,
+  onVideoReady,
   onNextVideo,
   onSelectSeat,
   onExitSitting,
@@ -93,9 +93,9 @@ export default function CinemaScene({
         theater={theater}
         showtime={showtime}
         videoIndex={videoIndex}
-        videoElement={videoElement}
         isMuted={isMuted}
         isLightsOn={isLightsOn}
+        onVideoReady={onVideoReady}
         onNextVideo={onNextVideo}
         position={[0, 4.5, -14]}
       />
