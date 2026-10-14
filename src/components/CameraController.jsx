@@ -6,11 +6,37 @@ import gsap from 'gsap'
 
 /*
   CameraController:
-  - Overview Mode: Camera placed inside the auditorium volume looking down at seats & screen
-    * OrbitControls constrained inside room bounds so camera never clips outside
-    * Smooth GSAP transitions
-  - Sitting Mode: Eye level in confirmed seat facing the movie screen with head look
+  ─────────────────
+  - Overview Mode: Camera orbits inside the auditorium with HARD BOUNDS
+    * Camera position is clamped every frame to stay within theater walls
+    * OrbitControls constrained with tight polar/azimuth angles
+    * Never shows outside the theater — always interior view
+  - Sitting Mode: Eye level in confirmed seat with head-look drag
+    * Camera stays locked at seat position
+    * Drag to look around (yaw/pitch clamped)
+
+  Theater room bounds (from TheaterRoom.jsx):
+    X walls: ±13.5
+    Z rear:  13.2     Z front (screen): ~-14
+    Y floor: 0        Y ceiling: ~11.5
 */
+
+// Hard interior bounds — keep generous padding from the walls
+const BOUNDS = {
+  minX: -12.0,
+  maxX: 12.0,
+  minY: 1.2,
+  maxY: 10.8,
+  minZ: -12.5,
+  maxZ: 12.5,
+}
+
+// Clamp a Vector3 inside the theater box
+function clampInsideTheater(vec) {
+  vec.x = THREE.MathUtils.clamp(vec.x, BOUNDS.minX, BOUNDS.maxX)
+  vec.y = THREE.MathUtils.clamp(vec.y, BOUNDS.minY, BOUNDS.maxY)
+  vec.z = THREE.MathUtils.clamp(vec.z, BOUNDS.minZ, BOUNDS.maxZ)
+}
 
 export default function CameraController({
   selectedSeat,
@@ -36,9 +62,9 @@ export default function CameraController({
   const getOverviewConfig = () => {
     const isMobilePortrait = typeof window !== 'undefined' && window.innerWidth < 768
     return {
-      pos: isMobilePortrait ? { x: 0, y: 10.2, z: 14.8 } : { x: 0, y: 7.5, z: 10.5 },
-      target: isMobilePortrait ? { x: 0, y: 1.8, z: -2.0 } : { x: 0, y: 2.0, z: -3.5 },
-      fov: isMobilePortrait ? 66 : 50,
+      pos: isMobilePortrait ? { x: 0, y: 10.4, z: 12.4 } : { x: 0, y: 8.5, z: 12.2 },
+      target: isMobilePortrait ? { x: 0, y: 2.6, z: -1.0 } : { x: 0, y: 2.8, z: -1.0 },
+      fov: isMobilePortrait ? 68 : 52,
       sittingFov: isMobilePortrait ? 64 : 58,
     }
   }
@@ -100,8 +126,14 @@ export default function CameraController({
       })
     } else {
       // ─── TRANSITION TO OVERVIEW ───
+      // Clamp the target overview position inside bounds
+      const targetPos = { ...cfg.pos }
+      targetPos.x = THREE.MathUtils.clamp(targetPos.x, BOUNDS.minX, BOUNDS.maxX)
+      targetPos.y = THREE.MathUtils.clamp(targetPos.y, BOUNDS.minY, BOUNDS.maxY)
+      targetPos.z = THREE.MathUtils.clamp(targetPos.z, BOUNDS.minZ, BOUNDS.maxZ)
+
       gsap.to(camera.position, {
-        ...cfg.pos,
+        ...targetPos,
         duration: 1.8,
         ease: 'power3.inOut',
       })
@@ -172,26 +204,35 @@ export default function CameraController({
     }
   }, [isSittingView, gl.domElement])
 
-  // Update sitting head orientation each frame
+  // ═══ EVERY FRAME: Clamp camera + orbit target inside theater bounds ═══
   useFrame(() => {
-    if (!isSittingView || !activeSeat) return
+    if (isSittingView && activeSeat) {
+      // ─── Sitting view: lock camera at seat, apply head look ───
+      const [sx, sy, sz] = activeSeat.position
+      const eyeY = sy + 0.95
+      const eyeZ = sz - 0.05
 
-    const [sx, sy, sz] = activeSeat.position
-    const eyeY = sy + 0.95
-    const eyeZ = sz - 0.05
+      headLook.current.yaw += (headLook.current.targetYaw - headLook.current.yaw) * 0.08
+      headLook.current.pitch += (headLook.current.targetPitch - headLook.current.pitch) * 0.08
 
-    headLook.current.yaw += (headLook.current.targetYaw - headLook.current.yaw) * 0.08
-    headLook.current.pitch += (headLook.current.targetPitch - headLook.current.pitch) * 0.08
+      const dirToScreen = new THREE.Vector3(0 - sx, 4.5 - eyeY, -14 - eyeZ).normalize()
+      const forward = dirToScreen.clone()
 
-    const dirToScreen = new THREE.Vector3(0 - sx, 4.5 - eyeY, -14 - eyeZ).normalize()
-    const forward = dirToScreen.clone()
+      forward.applyAxisAngle(new THREE.Vector3(0, 1, 0), headLook.current.yaw)
+      const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize()
+      forward.applyAxisAngle(right, headLook.current.pitch)
 
-    forward.applyAxisAngle(new THREE.Vector3(0, 1, 0), headLook.current.yaw)
-    const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize()
-    forward.applyAxisAngle(right, headLook.current.pitch)
+      const lookTarget = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z).add(forward)
+      camera.lookAt(lookTarget)
+    } else {
+      // ─── Overview mode: HARD CLAMP camera inside theater every frame ───
+      clampInsideTheater(camera.position)
 
-    const lookTarget = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z).add(forward)
-    camera.lookAt(lookTarget)
+      // Also clamp the orbit target so the controls don't drift the view outside
+      if (controlsRef.current) {
+        clampInsideTheater(controlsRef.current.target)
+      }
+    }
   })
 
   const currentCfg = getOverviewConfig()
@@ -202,10 +243,17 @@ export default function CameraController({
       enabled={!isSittingView}
       enableDamping
       dampingFactor={0.06}
-      maxPolarAngle={Math.PI / 2 - 0.08}
-      minPolarAngle={0.25}
+      /* Polar angle: prevent flipping under floor or above ceiling */
+      maxPolarAngle={Math.PI / 2 + 0.15}
+      minPolarAngle={0.2}
+      /* Azimuth: limit horizontal rotation to ±70° so sides stay visible */
+      minAzimuthAngle={-Math.PI * 0.38}
+      maxAzimuthAngle={Math.PI * 0.38}
+      /* Distance: tight range to keep camera inside the room */
       minDistance={3}
-      maxDistance={22}
+      maxDistance={18}
+      /* Disable panning to prevent camera from flying off to the side */
+      enablePan={false}
       target={[currentCfg.target.x, currentCfg.target.y, currentCfg.target.z]}
     />
   )

@@ -180,16 +180,6 @@ export default function App() {
             <span className="btn-text-short">Shows</span>
           </button>
 
-          {/* 🎲 Video Switcher Button */}
-          <button
-            className="header-btn video-switch-btn"
-            onClick={handleNextVideo}
-            title="Play next random movie trailer on 3D screen"
-          >
-            <span className="btn-icon">🎲</span>
-            <span className="btn-text-full">Change Video</span>
-            <span className="btn-text-short">Video</span>
-          </button>
 
           {/* 🔊 / 🔇 Sound Toggle Button */}
           <button

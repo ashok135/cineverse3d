@@ -12,14 +12,9 @@ import * as THREE from 'three'
 
 export const LOCAL_VIDEOS = [
   {
-    id: 'sample',
-    title: 'Cinematic 4K Nature Symphony',
-    src: '/videos/sample-trailer.mp4',
-  },
-  {
-    id: 'oceans',
-    title: 'IMAX Oceans Deep Sea Feature',
-    src: '/videos/oceans-trailer.mp4',
+    id: 'user-video',
+    title: 'Featured Cinema Experience',
+    src: '/videos/sample%20video.mp4',
   },
 ]
 
@@ -157,15 +152,6 @@ export default function Screen({
         </Suspense>
       </mesh>
 
-      {/* ═══════ 3. TOP & BOTTOM BEZEL ACCENTS ═══════ */}
-      <mesh position={[0, 3.65, 0.06]}>
-        <boxGeometry args={[16.2, 0.04, 0.02]} />
-        <meshBasicMaterial color={themeColor} />
-      </mesh>
-      <mesh position={[0, -3.65, 0.06]}>
-        <boxGeometry args={[16.2, 0.04, 0.02]} />
-        <meshBasicMaterial color={themeColor} />
-      </mesh>
 
       {/* ═══════ 4. DYNAMIC SCREEN WASH ONTO AUDIENCE ═══════ */}
       <pointLight
